@@ -1,0 +1,125 @@
+
+<html>
+  <head>
+    <script src='./UFUtil.js' ></script>
+    <script src='./MS.js' ></script>
+  </head>
+<body>
+
+  <label for="x">X (MAX 300):          </label><input type="number" id="x" name="x"></input><br/>
+        <label for="y">Y (MAX 150):          </label><input type="number" id="y" name="y"></input><br/>
+        <label for="width">Width (MAX 300):  </label><input type="number" id="width" name="width"></input><br/>
+        <label for="height">Height (MAX 150):</label><input type="number" id="height" name="height"></input><br/>
+        <label for="colors">Color</label>
+        <select id="colors">
+          <option value="red">red</option>
+          <option value="green">green</option>
+          <option value="blue">blue</option>
+          <option value="yellow">yellow</option>
+          <option value="orange">orange</option>
+        </select>
+        <br/>
+        <input type="button" value="Draw Rectangle" onclick='fillRedColor()'></input> <br/>
+
+  <br/>
+  <canvas id="myCanvas" width="250" height="200" style="border:1px solid #d3d3d3;">
+    Your browser does not support the HTML5 canvas tag.
+  </canvas>
+
+  <br/>
+  <input type="button" value="Do MeanShift Segmentation" onclick="SegmentImage()"/>
+
+  <br/>
+
+  <!-- <p>MeanShift Filtering Result</p>
+   <canvas id="myFilter" width="250" height="200" style="border:1px solid #d3d3d3;">
+    Your browser does not support the HTML5 canvas tag.
+  </canvas>
+
+  <br/> -->
+
+  <p>Meanshift Segmentaton Result</p>
+<canvas id="myResult" width="250" height="200" style="border:1px solid #d3d3d3;">
+  Your browser does not support the HTML5 canvas tag.
+</canvas>
+
+  <script>
+       function fillRedColor() {
+                 
+                var  FIXED_WIDTH = document.getElementById('width').value;
+                var  FIXED_HEIGHT = document.getElementById('height').value;
+                var  FIXED_X = document.getElementById('x').value;
+                var  FIXED_Y = document.getElementById('y').value;
+                var COLOR = document.getElementById('colors').value;
+                var c = document.getElementById("myCanvas");
+                var ctx = c.getContext("2d");
+                ctx.fillStyle = COLOR;
+                ctx.fillRect(FIXED_X, FIXED_Y, FIXED_WIDTH, FIXED_HEIGHT);
+               
+       }
+  </script>
+  <script>
+            function  SegmentImage() {
+                    var c = document.getElementById("myCanvas");
+                    var ctx = c.getContext("2d");
+                 
+                    var imgData = ctx.getImageData(0, 0, c.width, c.height);
+   
+                      var copiedData = new Uint8Array(imgData.data.length);
+                      for (var i = 0; i < imgData.data.length; i++) {
+                       copiedData[i] = imgData.data[i];
+                     }
+                    
+                     var output = {
+                       width: imgData.width,
+                       height: imgData.height,
+                       data: copiedData
+                    }
+
+                   
+                    // var radius = 5;
+                    // MeanShiftFilter(imgData, output, radius);
+                    // copyData(output, imgData);
+                    // var filterResult = document.getElementById("myFilter");
+                    // var filterResultContext = filterResult.getContext("2d");
+                    // filterResultContext.putImageData(imgData,0,0);
+                    // console.log("Finished meanshift filtering!!!");
+
+
+                    console.log("Start segmentation");
+                    var result = document.getElementById("myResult");
+                    var ctxResult = result.getContext("2d");
+                   
+                    var labelComponents = Segment(imgData);
+                    visualize(ctxResult, labelComponents, imgData.width, imgData.height);
+                    console.log('End segmentation. Done!');
+
+            };
+
+            function visualize(ctxResult, result, width, height, ) {
+              for (var r = 0; r < height; r++) {
+		            for (var c = 0; c < width; c++) {
+                            
+                        var curr_pixel_value = result.labels[r*width + c];
+
+                            if (curr_pixel_value < 0 ) {
+                                ctxResult.fillStyle = "black";
+                            } else if ((curr_pixel_value % 4) == 0) {
+                                ctxResult.fillStyle = "blue";
+                            } else if ((curr_pixel_value % 4) == 1) {
+                                ctxResult.fillStyle = "green";
+                            } else if ((curr_pixel_value % 4) == 2) {
+                                ctxResult.fillStyle = "yellow";
+                            } else if ((curr_pixel_value % 4) == 3) {
+                                ctxResult.fillStyle = "orange";
+                            } else {
+                                ctxResult.fillStyle = "white";
+                            }
+                        ctxResult.fillRect(c, r, 1, 1);
+                    }
+                }
+            }
+  </script>
+
+</body>
+</html>
